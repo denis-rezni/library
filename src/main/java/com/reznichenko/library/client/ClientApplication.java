@@ -15,6 +15,19 @@ public class ClientApplication {
 
     private final String BASE_URL = "http://localhost:8080/";
     private final String END_STRING = "end";
+    private final String HELP_STRING = "help";
+
+    private final String HELP_MESSAGE = "add-book name author code -- adds a new book with a given name, author and unique code" + System.lineSeparator() +
+            "book-name code -- prints the name of the book with the given code" + System.lineSeparator() +
+            "author code -- prints the author of a book with the given code" + System.lineSeparator() +
+            "add-visitor name surname -- adds a new visitor. prints the id of this visitor" + System.lineSeparator() +
+            "lend id code -- lends a book to a given visitor" + System.lineSeparator() +
+            "receive code -- returns the book back to the library" + System.lineSeparator() +
+            "change-code -- changes the code of a given book" + System.lineSeparator() +
+            "delete-book code -- deletes a book from the library" + System.lineSeparator() +
+            "list id -- lists all the books borrowed by visitor with the given id" + System.lineSeparator() +
+            "help -- shows this message" + System.lineSeparator() +
+            "end -- terminates the application";
 
     OkHttpClient client = new OkHttpClient();
     BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -25,7 +38,19 @@ public class ClientApplication {
             Map.entry("book-name",
                     new Command("book-name", List.of("code"), RequestType.GET)),
             Map.entry("author",
-                    new Command("author", List.of("code"), RequestType.GET))
+                    new Command("author", List.of("code"), RequestType.GET)),
+            Map.entry("add-visitor",
+                    new Command("add-visitor", List.of("name", "surname"), RequestType.POST)),
+            Map.entry("lend",
+                    new Command("lend-book", List.of("id", "code"), RequestType.POST)),
+            Map.entry("receive",
+                    new Command("receive", List.of("code"), RequestType.POST)),
+            Map.entry("change-code",
+                    new Command("change-code", List.of("old", "new"), RequestType.POST)),
+            Map.entry("delete-book",
+                    new Command("delete-book", List.of("code"), RequestType.POST)),
+            Map.entry("list",
+                    new Command("borrowed-books", List.of("id"), RequestType.GET))
     );
 
 
@@ -39,6 +64,10 @@ public class ClientApplication {
             String type = split[0];
             if (type.equals(END_STRING)) {
                 return;
+            }
+            if (type.equals(HELP_STRING)) {
+                System.out.println(HELP_MESSAGE);
+                continue;
             }
             try {
                 if (commands.containsKey(type)) {
@@ -75,7 +104,6 @@ public class ClientApplication {
                 throw new UnknownCommandException("no command know for request type: " + command.type);
             }
         }
-        //TODO
         if (response.body() == null) {
             System.out.println();
         } else {
