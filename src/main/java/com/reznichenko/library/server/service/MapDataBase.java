@@ -66,7 +66,7 @@ public class MapDataBase implements DataBase {
     }
 
     @Override
-    public void lendBook(long visitorId, String code) throws NoSuchBookException, BookAlreadyBorrowedException, NoSuchVisitorException {
+    public synchronized void lendBook(long visitorId, String code) throws NoSuchBookException, BookAlreadyBorrowedException, NoSuchVisitorException {
         Book book = getBookSafely(code);
         if (codeToOwner.containsKey(code)) {
             throw new BookAlreadyBorrowedException("book with code " + code + " is already borrowed by id " +
@@ -78,7 +78,7 @@ public class MapDataBase implements DataBase {
     }
 
     @Override
-    public void receiveReturnedBook(String code) throws NoSuchBookException {
+    public synchronized void receiveReturnedBook(String code) throws NoSuchBookException {
         Book book = getBookSafely(code);
         Visitor owner = codeToOwner.get(code);
         deleteFromOwner(owner, book);
@@ -116,14 +116,6 @@ public class MapDataBase implements DataBase {
     private void deleteFromOwner(Visitor owner, Book book) {
         if (owner == null) return;
         borrowedBooks.get(owner.getId()).remove(book);
-    }
-
-    //debug only
-    //TODO delete
-    public void printVisitors() {
-        for (Visitor visitor : visitors.values()) {
-            System.out.println(visitor);
-        }
     }
 
     //debug
