@@ -74,7 +74,7 @@ public class ClientApplication {
                     Command command = commands.get(type);
                     processCommand(command, split);
                 } else {
-                    throw new UnknownCommandException("no such command:" + type + ", use help");
+                    throw new UnknownCommandException("no such command, use help");
                 }
             } catch (UnknownCommandException e) {
                 //no need to stop the execution
