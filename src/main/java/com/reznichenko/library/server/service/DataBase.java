@@ -23,7 +23,7 @@ public interface DataBase {
 
     void deleteBook(String code) throws NoSuchBookException;
 
-    void changeCode(String oldCode, String newCode) throws NoSuchBookException;
+    void changeCode(String oldCode, String newCode) throws NoSuchBookException, BookAlreadyExistsException;
 
     void lendBook(long visitorId, String code) throws NoSuchBookException, BookAlreadyBorrowedException, NoSuchVisitorException;
 

@@ -2,6 +2,7 @@ package com.reznichenko.library.server.service;
 
 import com.reznichenko.library.server.entity.Book;
 import com.reznichenko.library.server.exception.*;
+import org.junit.jupiter.api.function.Executable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,54 +29,29 @@ public class LibraryController {
                                           @RequestParam("author") String author,
                                           @RequestParam("code") String code) {
         Book book = new Book(code, author, name);
-        try {
-            db.addBook(book);
-        } catch (BookAlreadyExistsException e) {
-            throw new IllegalRequestException("bad request: " + e.getMessage(), e);
-        }
-        return positiveResponse("book added");
+        return executePost(() -> db.addBook(book), "book added");
     }
 
     @PostMapping(params = {"id", "code"}, value = "lend-book")
     public ResponseEntity<String> lendBook(@RequestParam("id") long id,
                                            @RequestParam("code") String code) {
-        try {
-            db.lendBook(id, code);
-        } catch (NoSuchVisitorException | NoSuchBookException | BookAlreadyBorrowedException e) {
-            throw new IllegalRequestException("bad request: " + e.getMessage(), e);
-        }
-        return positiveResponse("book lent");
+        return executePost(() -> db.lendBook(id, code), "book lent");
     }
 
     @PostMapping(params = {"code"}, value = "receive")
     public ResponseEntity<String> receiveBook(@RequestParam("code") String code) {
-        try {
-            db.receiveReturnedBook(code);
-        } catch (NoSuchBookException e) {
-            throw new IllegalRequestException("bad request: " + e.getMessage(), e);
-        }
-        return positiveResponse("book returned");
+        return executePost(() -> db.receiveReturnedBook(code), "book returned");
     }
 
     @PostMapping(params = {"old", "new"}, value = "change-code")
     public ResponseEntity<String> changeCode(@RequestParam("old") String oldCode,
                                              @RequestParam("new") String newCode) {
-        try {
-            db.changeCode(oldCode, newCode);
-        } catch (NoSuchBookException e) {
-            throw new IllegalRequestException("bad request: " + e.getMessage(), e);
-        }
-        return positiveResponse("code changed");
+        return executePost(() -> db.changeCode(oldCode, newCode), "code changed");
     }
 
     @PostMapping(params = "code", value = "delete-book")
     public ResponseEntity<String> deleteBook(@RequestParam("code") String code) {
-        try {
-            db.deleteBook(code);
-        } catch (NoSuchBookException e) {
-            throw new IllegalRequestException("bad request: " + e.getMessage(), e);
-        }
-        return positiveResponse("book deleted");
+        return executePost(() -> db.deleteBook(code), "book deleted");
     }
 
     @GetMapping(params = "code", value = "author")
@@ -83,7 +59,7 @@ public class LibraryController {
         try {
             return positiveResponse(db.getBookAuthor(code));
         } catch (NoSuchBookException e) {
-            throw new IllegalRequestException("bad request: " + e.getMessage(), e);
+            throw new IllegalRequestException(e);
         }
     }
 
@@ -92,7 +68,7 @@ public class LibraryController {
         try {
             return positiveResponse(db.getBookName(code));
         } catch (NoSuchBookException e) {
-            throw new IllegalRequestException("bad request: " + e.getMessage(), e);
+            throw new IllegalRequestException(e);
         }
     }
 
@@ -102,15 +78,25 @@ public class LibraryController {
             List<Book> books = db.getBorrowedBooks(id);
             return ResponseEntity.ok(books.stream().map(Object::toString).collect(Collectors.toList()));
         } catch (NoSuchVisitorException e) {
-            throw new IllegalRequestException("bad request: " + e.getMessage(), e);
+            throw new IllegalRequestException(e);
         }
     }
+
+    private ResponseEntity<String> executePost(Executable executable, String ifSucceeds) {
+        try {
+            executable.execute();
+        } catch (Throwable cause) {
+            throw new IllegalRequestException(cause);
+        }
+        return positiveResponse(ifSucceeds);
+    }
+
 
     private ResponseEntity<String> positiveResponse(String msg) {
         return ResponseEntity.ok(msg);
     }
 
-
+    //debug
     private void print() {
         ((MapDataBase) db).printWholeLibrary();
     }
