@@ -9,14 +9,13 @@ import com.reznichenko.library.server.service.DataBase;
 import com.reznichenko.library.server.service.MapDataBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class LibraryApplicationTests {
+class DataBaseTests {
 
     private DataBase db; // MapDataBase has more functions than the interface it implements, but i don't test them
 
