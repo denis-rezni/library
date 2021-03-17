@@ -101,7 +101,7 @@ public class ClientApplication {
                 break;
             }
             default: {
-                throw new UnknownCommandException("no command know for request type: " + command.type);
+                throw new UnknownCommandException("no command known for request type: " + command.type);
             }
         }
         if (response.body() == null) {

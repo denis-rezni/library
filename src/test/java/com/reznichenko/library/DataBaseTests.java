@@ -122,6 +122,4 @@ class DataBaseTests {
         db.receiveReturnedBook(newCode);
         assertEquals(List.of(), db.getBorrowedBooks(id));
     }
-
-
 }
