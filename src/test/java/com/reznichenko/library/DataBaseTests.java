@@ -52,15 +52,15 @@ class DataBaseTests {
         for (Book book : books) {
             db.addBook(book);
         }
-        assertEquals(db.getBookAuthor("r2d2"), "Ayn Rand");
-        assertEquals(db.getBookName("r2d3"), "Fountainhead");
-        assertEquals(db.getBookAuthor("w8m8"), "fedor dostoevsky");
-        assertEquals(db.getBookName("c3po"), "hpmor");
+        assertEquals("Ayn Rand", db.getBookAuthor("r2d2"));
+        assertEquals("Fountainhead", db.getBookName("r2d3"));
+        assertEquals("fedor dostoevsky", db.getBookAuthor("w8m8"));
+        assertEquals("hpmor", db.getBookName("c3po"));
         db.deleteBook("r2d3");
         assertThrows(NoSuchBookException.class, () -> db.getBookAuthor("r2d3"));
-        assertEquals(db.getBookAuthor("r2d2"), "Ayn Rand");
-        assertEquals(db.getBookName("w8m8"), "idiot");
-        assertEquals(db.getBookAuthor("c3po"), "eliezer yudkowsky");
+        assertEquals("Ayn Rand", db.getBookAuthor("r2d2"));
+        assertEquals("idiot",db.getBookName("w8m8"));
+        assertEquals("eliezer yudkowsky", db.getBookAuthor("c3po"));
     }
 
     @Test
@@ -69,10 +69,10 @@ class DataBaseTests {
             db.addBook(book);
         }
         db.changeCode("r2d2", "r2d4");
-        assertEquals(db.getBookAuthor("r2d4"), "Ayn Rand");
-        assertEquals(db.getBookAuthor("r2d3"), "Ayn Rand");
-        assertEquals(db.getBookName("r2d3"), "Fountainhead");
-        assertEquals(db.getBookName("r2d4"), "Atlas shrugged");
+        assertEquals("Ayn Rand", db.getBookAuthor("r2d4"));
+        assertEquals("Ayn Rand", db.getBookAuthor("r2d3"));
+        assertEquals("Fountainhead" , db.getBookName("r2d3"));
+        assertEquals("Atlas shrugged", db.getBookName("r2d4"));
         assertThrows(NoSuchBookException.class, () -> db.getBookAuthor("r2d2"));
         assertThrows(BookAlreadyExistsException.class, () -> db.changeCode("r2d4", "r2d3"));
         assertThrows(BookAlreadyExistsException.class, () -> db.changeCode("r2d4", "c3po"));
@@ -93,8 +93,8 @@ class DataBaseTests {
         db.lendBook(id1, books.get(1).getCode());
         db.lendBook(id2, books.get(2).getCode());
         db.lendBook(id2, books.get(3).getCode());
-        assertEquals(db.getBorrowedBooks(id1), books.subList(0, 2));
-        assertEquals(db.getBorrowedBooks(id2), books.subList(2, 4));
+        assertEquals(books.subList(0, 2), db.getBorrowedBooks(id1));
+        assertEquals(books.subList(2, 4), db.getBorrowedBooks(id2));
         assertThrows(BookAlreadyBorrowedException.class, () -> db.lendBook(id1, books.get(0).getCode()));
         assertThrows(BookAlreadyBorrowedException.class, () -> db.lendBook(id2, books.get(0).getCode()));
         db.receiveReturnedBook(books.get(0).getCode());
@@ -102,11 +102,26 @@ class DataBaseTests {
         db.lendBook(id2, books.get(0).getCode());
         db.deleteBook(books.get(2).getCode());
         db.deleteBook(books.get(3).getCode());
-        assertEquals(db.getBorrowedBooks(id2), books.subList(0, 1));
+        assertEquals(books.subList(0, 1), db.getBorrowedBooks(id2));
         db.receiveReturnedBook(books.get(0).getCode());
-        assertEquals(db.getBorrowedBooks(id2), List.of());
+        assertEquals(List.of(), db.getBorrowedBooks(id2));
     }
 
+    @Test
+    void lendAndChangeCode() throws BookAlreadyExistsException, NoSuchBookException, NoSuchVisitorException, BookAlreadyBorrowedException {
+        long id = db.addVisitor("A", "T");
+        for (Book book : books) {
+            db.addBook(book);
+        }
+        String oldCode = books.get(0).getCode();
+        String newCode = "qwerty";
+        db.lendBook(id, oldCode);
+        db.changeCode(oldCode, newCode);
+        assertEquals(List.of(books.get(0)), db.getBorrowedBooks(id));
+        assertThrows(NoSuchBookException.class, () -> db.receiveReturnedBook(oldCode));
+        db.receiveReturnedBook(newCode);
+        assertEquals(List.of(), db.getBorrowedBooks(id));
+    }
 
 
 }

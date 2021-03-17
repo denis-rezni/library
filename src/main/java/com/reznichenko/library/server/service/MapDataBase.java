@@ -61,12 +61,14 @@ public class MapDataBase implements DataBase {
     @Override
     public synchronized void changeCode(String oldCode, String newCode) throws NoSuchBookException, BookAlreadyExistsException {
         if (codeToBook.containsKey(newCode)) {
-            throw new BookAlreadyExistsException("couldn't change code to " + newCode + ", book with this code alredy exists");
+            throw new BookAlreadyExistsException("couldn't change code to " + newCode + ", book with this code already exists");
         }
         Book book = getBookSafely(oldCode);
         book.setCode(newCode);
         codeToBook.remove(oldCode);
         codeToBook.put(newCode, book);
+        Visitor owner = codeToOwner.remove(oldCode);
+        codeToOwner.put(newCode, owner);
     }
 
     @Override
